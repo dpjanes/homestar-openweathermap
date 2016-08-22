@@ -9,11 +9,11 @@ http://openweathermap.org/api
 
 # Installation
 
-[Install Home☆Star first](https://homestar.io/about/install).
+* [Read this first](https://github.com/dpjanes/node-iotdb/blob/master/docs/install.md)
 
 Then:
 
-    $ homestar install homestar-openweathermap
+    $ npm install homestar-openweathermap
 
 # Testing
 

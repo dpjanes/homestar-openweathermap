@@ -4,7 +4,8 @@
         "url": "https://github.com/dpjanes/homestar-openweathermap/issues"
     }, 
     "dependencies": {
-        "iotdb": ">=0.6.3"
+        "iotdb": ">=0.6.3",
+        "openweathermap": ""
     }, 
     "description": "HomeStar / IOTDB Bridge for OpenWeatherMap", 
     "devDependencies": {

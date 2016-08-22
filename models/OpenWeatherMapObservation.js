@@ -10,5 +10,5 @@ var iotdb = require("iotdb");
 
 exports.binding = {
     bridge: require('../OpenWeatherMapBridge').Bridge,
-    model: require('./OpenWeatherMapObservation.json'),
+    model: require('./open-weather-map-observation.json'),
 };

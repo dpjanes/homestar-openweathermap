@@ -7,9 +7,9 @@
 "use strict";
 
 var iotdb = require('iotdb');
-var iot = iotdb.iot();
+iotdb.use("homestar-openweathermap");
 
-var things = iot.connect('OpenWeatherMapObservation');
+var things = iotdb.connect('OpenWeatherMapObservation');
 things.on("state", function(thing) {
     console.log("+", "state", thing.thing_id(), "\n ", thing.state("istate"));
 });

@@ -1,5 +1,5 @@
 # homestar-openweathermap
-IOTDB / Home☆Star Module for [OpenWeatherMap]().
+[IOTDB](https://github.com/dpjanes/node-iotdb) Bridge for for [OpenWeatherMap](http://openweathermap.org/).
 
 <img src="https://raw.githubusercontent.com/dpjanes/iotdb-homestar/master/docs/HomeStar.png" align="right" />
 

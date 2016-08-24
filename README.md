@@ -3,9 +3,12 @@
 
 <img src="https://raw.githubusercontent.com/dpjanes/iotdb-homestar/master/docs/HomeStar.png" align="right" />
 
+# About
 NOTE THIS IS A PLACEHOLDER - if you really it, open a defect and I'll finish it up
 
 http://openweathermap.org/api
+
+* [Read about Bridges](https://github.com/dpjanes/node-iotdb/blob/master/docs/bridges.md)
 
 # Installation
 

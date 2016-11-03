@@ -55,10 +55,6 @@ var OpenWeatherMapBridge = function (initd, native) {
 
 OpenWeatherMapBridge.prototype = new iotdb.Bridge();
 
-OpenWeatherMapBridge.prototype.name = function () {
-    return "OpenWeatherMapBridge";
-};
-
 /* --- lifecycle --- */
 
 /**

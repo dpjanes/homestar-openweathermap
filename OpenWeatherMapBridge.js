@@ -27,6 +27,7 @@ const _ = iotdb._;
 
 const assert = require("assert");
 const unirest = require("unirest");
+const cjson = require("canonical-json");
 
 const logger = iotdb.logger({
     name: 'homestar-openweathermap',
@@ -44,13 +45,19 @@ const OpenWeatherMapBridge = function (initd, native) {
 
     self.initd = _.defaults(initd,
         iotdb.keystore().get("bridges/OpenWeatherMapBridge/initd"), {
-            poll: 120,
+            poll: 10 * 60,
             location: null,
+            id: null,
+            name: null,
         }
     );
-    self.native = native;   // the thing that does the work - keep this name
 
-    assert.ok(!_.is.Empty(self.location), "initd.location is required");
+    self.native = native;   
+    self.hashd = {}
+
+    assert.ok(!_.is.Empty(self.initd.location), "initd.location is required");
+    assert.ok(!_.is.Empty(self.initd.key), "initd.key is required");
+    assert.ok([ "observation", "forecast" ].indexOf(self.initd.retrieve) !== -1, "initd.retrieve must be 'observation' or 'forecast'");
 };
 
 OpenWeatherMapBridge.prototype = new iotdb.Bridge();
@@ -67,7 +74,22 @@ OpenWeatherMapBridge.prototype.discover = function () {
         method: "discover"
     }, "called");
 
-    self.discovered(new FeedBridge(self.initd, {}));
+    let found = false;
+    const _try = () => {
+        self._fetch(item => {
+            found = true;
+            clearTimeout(timer);
+
+            self.discovered(new OpenWeatherMapBridge(self.initd, {
+                id: item.id,
+                name: item.name,
+            }));
+        })
+    }
+
+    _try()
+    const timer = setInterval(_try, 30 * 1000);
+
 };
 
 /**
@@ -145,28 +167,6 @@ OpenWeatherMapBridge.prototype.push = function (pushd, done) {
         method: "push",
         pushd: pushd
     }, "push");
-
-    var qitem = {
-        // if you set "id", new pushes will unqueue old pushes with the same id
-        // id: self.number, 
-        run: function () {
-            self._pushd(pushd);
-            self.queue.finished(qitem);
-        },
-        coda: function() {
-            done();
-        },
-    };
-    self.queue.add(qitem);
-};
-
-/**
- *  Do the work of pushing. If you don't need queueing
- *  consider just moving this up into push
- */
-OpenWeatherMapBridge.prototype._push = function (pushd) {
-    if (pushd.on !== undefined) {
-    }
 };
 
 /**
@@ -177,7 +177,90 @@ OpenWeatherMapBridge.prototype.pull = function () {
     if (!self.native) {
         return;
     }
+
+    self._fetch(self.pulled);
 };
+
+OpenWeatherMapBridge.prototype._cook = function (ind) {
+    const _k2c = value => {
+        if (_.is.Null(value)) {
+            return null
+        }
+
+        return _.convert.convert({
+            value: value,
+            from: 'iot-unit:temperature.si.kelvin',
+            to: 'iot-unit:temperature.si.celsius',
+        });
+    }
+
+    const outd = {
+        name: _.d.first(ind, "/name", null),
+        id: _.d.first(ind, "/id", null),
+        description: _.d.first(ind, "/weather/description"),
+
+        latitude: _.d.first(ind, "/coord/lat", null),
+        longitude: _.d.first(ind, "/coord/lon", null),
+
+        temperature: _k2c(_.d.first(ind, "/main/temp", null)),
+        pressure: _.d.first(ind, "/main/pressure", null),
+        humidity: _.d.first(ind, "/main/humidity", null),
+        temperature_minimum: _k2c(_.d.first(ind, "/main/temp_min", null)),
+        temperature_maximum: _k2c(_.d.first(ind, "/main/temp_max", null)),
+
+        visibility: _.d.first(ind, "/visibility", null),
+
+        wind_speed: _.d.first(ind, "/wind/speed", null),
+        wind_degrees: _.d.first(ind, "/wind/deg", null),
+    }
+
+    return _.d.transform(outd, { filter: value => value !== null });
+}
+
+OpenWeatherMapBridge.prototype._fetch = function (pulled) {
+    const self = this;
+
+    if (self.initd.retrieve === "observation") {
+        self._fetch_observation(pulled)
+    } else if (self.initd.retrieve === "forecast") {
+        self._fetch_forecast(pulled)
+    } else {
+        assert.ok(false, "can't get here");
+    }
+}
+
+OpenWeatherMapBridge.prototype._fetch_observation = function (pulled) {
+    const self = this;
+
+    const url = `http://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(self.initd.location)}&appid=${self.initd.key}`
+
+    unirest
+        .get(url)
+        .end(result => {
+            if (result.error) {
+                logger.error({
+                    method: "_fetch_observation",
+                    error: result.error,
+                }, "likely a network error");
+                return;
+            }
+
+            const hash = _.hash.md5(cjson(result.body))
+            if (self.hashd["forecast"] === hash) {
+                logger.debug({
+                    method: "_fetch_observation",
+                }, "no change");
+                return;
+            }
+
+            self.hashd["forecast"] = hash;
+
+            pulled(self._cook(result.body));
+        })
+}
+
+OpenWeatherMapBridge.prototype._fetch_forecast = function (pulled) {
+}
 
 /* --- state --- */
 
@@ -191,7 +274,7 @@ OpenWeatherMapBridge.prototype.meta = function () {
     }
 
     return {
-        "iot:thing-id": _.id.thing_urn.unique("OpenWeatherMap", self.native.uuid, self.initd.number),
+        "iot:thing-id": _.id.thing_urn.unique("OpenWeatherMap", self.initd.retrieve, self.native.id),
         "schema:name": self.native.name || "OpenWeatherMap",
 
         // "iot:thing-number": self.initd.number,
@@ -217,3 +300,4 @@ OpenWeatherMapBridge.prototype.configure = function (app) {};
  *  API
  */
 exports.Bridge = OpenWeatherMapBridge;
+

@@ -6,18 +6,18 @@
 
 "use strict";
 
-var iotdb = require('iotdb');
+const iotdb = require('iotdb');
 iotdb.use("homestar-openweathermap");
 
-var things = iotdb.connect('OpenWeatherMapObservation');
-things.on("istate", function(thing) {
+const things = iotdb.connect('OpenWeatherMapObservation', {
+    location: "Palm Springs, CA"
+});
+things.on("istate", thing => {
     console.log("+", "istate", thing.thing_id(), "\n ", thing.state("istate"));
 });
-things.on("meta", function(thing) {
+things.on("meta", thing => {
     console.log("+", "meta", thing.thing_id(), "\n ", thing.state("meta"));
 });
-things.on("thing", function(thing) {
+things.on("thing", thing => {
     console.log("+", "discovered", thing.thing_id(), "\n ", thing.state("meta"));
 });
-
-

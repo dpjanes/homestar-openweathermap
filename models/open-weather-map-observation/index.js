@@ -9,4 +9,8 @@
 exports.binding = {
     bridge: require('../../OpenWeatherMapBridge').Bridge,
     model: require('./model.json'),
+    discover: false,
+    initd: {
+        retrieve: "observation",
+    },
 };

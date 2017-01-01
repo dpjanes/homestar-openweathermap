@@ -24,7 +24,8 @@
 
 exports.Bridge = require('./OpenWeatherMapBridge').Bridge;
 exports.bindings = [
-    require('./models/OpenWeatherMapObservation').binding,
+    require('./models/open-weather-map-observation').binding,
+    require('./models/open-weather-map-forecast').binding,
 ];
 
 exports.module_folder = __dirname;

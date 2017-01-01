@@ -1,0 +1,25 @@
+CREATE MODEL OpenWeatherMapForecast WITH
+    schema:name = "Open Weather Map Forecast"
+ATTRIBUTE temperature WITH
+    schema:name = "temperature",
+    iot:purpose = iot-purpose:temperature,
+    iot:type = iot:type.number,
+    iot:unit = iot-unit:temperature.si.celsius,
+    iot:sensor = true,
+    iot:read = true
+ATTRIBUTE humidity WITH
+    schema:name = "humidity",
+    iot:purpose = iot-purpose:humidity,
+    iot:type = iot:type.number,
+    iot:unit = iot-unit:math.fraction.percent,
+    iot:minimum = 0,
+    iot:maximum = 100,
+    iot:sensor = true,
+    iot:read = true
+ATTRIBUTE conditions WITH
+    schema:name = "conditions",
+    iot:purpose = iot-purpose:value,
+    iot:type = iot:type.string,
+    iot:sensor = true,
+    iot:read = true
+;

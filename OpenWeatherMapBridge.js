@@ -22,12 +22,13 @@
 
 "use strict";
 
-var iotdb = require('iotdb');
-var _ = iotdb._;
+const iotdb = require('iotdb');
+const _ = iotdb._;
 
-// var openweathermap = require('openweathermap');
+const assert = require("assert");
+const unirest = require("unirest");
 
-var logger = iotdb.logger({
+const logger = iotdb.logger({
     name: 'homestar-openweathermap',
     module: 'OpenWeatherMapBridge',
 });
@@ -38,19 +39,18 @@ var logger = iotdb.logger({
  *  @param {object|undefined} native
  *  only used for instances, should be 
  */
-var OpenWeatherMapBridge = function (initd, native) {
-    var self = this;
+const OpenWeatherMapBridge = function (initd, native) {
+    const self = this;
 
     self.initd = _.defaults(initd,
         iotdb.keystore().get("bridges/OpenWeatherMapBridge/initd"), {
-            poll: 30
+            poll: 120,
+            location: null,
         }
     );
     self.native = native;   // the thing that does the work - keep this name
 
-    if (self.native) {
-        self.queue = _.queue("OpenWeatherMapBridge");
-    }
+    assert.ok(!_.is.Empty(self.location), "initd.location is required");
 };
 
 OpenWeatherMapBridge.prototype = new iotdb.Bridge();
@@ -61,29 +61,20 @@ OpenWeatherMapBridge.prototype = new iotdb.Bridge();
  *  See {iotdb.bridge.Bridge#discover} for documentation.
  */
 OpenWeatherMapBridge.prototype.discover = function () {
-    var self = this;
+    const self = this;
 
     logger.info({
         method: "discover"
     }, "called");
 
-    /*
-     *  This is the core bit of discovery. As you find new
-     *  thimgs, make a new OpenWeatherMapBridge and call 'discovered'.
-     *  The first argument should be self.initd, the second
-     *  the thing that you do work with
-     */
-    var s = self._openweathermap();
-    s.on('something', function (native) {
-        self.discovered(new OpenWeatherMapBridge(self.initd, native));
-    });
+    self.discovered(new FeedBridge(self.initd, {}));
 };
 
 /**
  *  See {iotdb.bridge.Bridge#connect} for documentation.
  */
 OpenWeatherMapBridge.prototype.connect = function (connectd) {
-    var self = this;
+    const self = this;
     if (!self.native) {
         return;
     }
@@ -95,7 +86,7 @@ OpenWeatherMapBridge.prototype.connect = function (connectd) {
 };
 
 OpenWeatherMapBridge.prototype._setup_polling = function () {
-    var self = this;
+    const self = this;
     if (!self.initd.poll) {
         return;
     }
@@ -111,7 +102,7 @@ OpenWeatherMapBridge.prototype._setup_polling = function () {
 };
 
 OpenWeatherMapBridge.prototype._forget = function () {
-    var self = this;
+    const self = this;
     if (!self.native) {
         return;
     }
@@ -128,7 +119,7 @@ OpenWeatherMapBridge.prototype._forget = function () {
  *  See {iotdb.bridge.Bridge#disconnect} for documentation.
  */
 OpenWeatherMapBridge.prototype.disconnect = function () {
-    var self = this;
+    const self = this;
     if (!self.native || !self.native) {
         return;
     }
@@ -142,7 +133,7 @@ OpenWeatherMapBridge.prototype.disconnect = function () {
  *  See {iotdb.bridge.Bridge#push} for documentation.
  */
 OpenWeatherMapBridge.prototype.push = function (pushd, done) {
-    var self = this;
+    const self = this;
     if (!self.native) {
         done(new Error("not connected"));
         return;
@@ -182,7 +173,7 @@ OpenWeatherMapBridge.prototype._push = function (pushd) {
  *  See {iotdb.bridge.Bridge#pull} for documentation.
  */
 OpenWeatherMapBridge.prototype.pull = function () {
-    var self = this;
+    const self = this;
     if (!self.native) {
         return;
     }
@@ -194,7 +185,7 @@ OpenWeatherMapBridge.prototype.pull = function () {
  *  See {iotdb.bridge.Bridge#meta} for documentation.
  */
 OpenWeatherMapBridge.prototype.meta = function () {
-    var self = this;
+    const self = this;
     if (!self.native) {
         return;
     }
@@ -221,22 +212,6 @@ OpenWeatherMapBridge.prototype.reachable = function () {
  *  See {iotdb.bridge.Bridge#configure} for documentation.
  */
 OpenWeatherMapBridge.prototype.configure = function (app) {};
-
-/* -- internals -- */
-var __singleton;
-
-/**
- *  If you need a singleton to access the library
- */
-OpenWeatherMapBridge.prototype._openweathermap = function () {
-    var self = this;
-
-    if (!__singleton) {
-        __singleton = openweathermap.init();
-    }
-
-    return __singleton;
-};
 
 /*
  *  API

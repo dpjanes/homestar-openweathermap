@@ -5,7 +5,7 @@
     }, 
     "dependencies": {
         "iotdb": ">=0.6.3",
-        "openweathermap": ""
+        "unirest": ""
     }, 
     "description": "IOTDB Bridge for OpenWeatherMap", 
     "devDependencies": {
@@ -32,5 +32,5 @@
     "scripts": {
         "test": "grunt"
     }, 
-    "version": "0.0.0"
+    "version": "1.0.0"
 }

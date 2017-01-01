@@ -32,10 +32,12 @@ echo "=================="
 
     tar cf - \
         --exclude "node_modules" \
+        --exclude "xx*" \
+        --exclude "yy*" \
         README.md LICENSE \
         homestar.json package.json \
         OpenWeatherMapBridge.js index.js \
-        models/*.js models/*.json \
+        models/*/*.js models/*/*.json \
         |
     ( cd "${NPM_DST}" && tar xvf - && npm publish ) || exit 1
     git commit -m "new release" package.json || exit 1

@@ -12,10 +12,22 @@
       "@id": "https://iotdb.org/pub/iot#type",
       "@type": "@id"
     },
+    "iot:format": {
+      "@id": "https://iotdb.org/pub/iot#format",
+      "@type": "@id"
+    },
     "iot-purpose": "https://iotdb.org/pub/iot-purpose#",
     "iot-unit": "https://iotdb.org/pub/iot-unit#",
     "iot:unit": {
       "@id": "https://iotdb.org/pub/iot#unit",
+      "@type": "@id"
+    },
+    "iot:qualifier": {
+      "@id": "https://iotdb.org/pub/iot#qualifier",
+      "@type": "@id"
+    },
+    "iot:qualifier-period": {
+      "@id": "https://iotdb.org/pub/iot#qualifier-period",
       "@type": "@id"
     }
   },
@@ -32,6 +44,18 @@
       "iot:type": "iot:type.string",
       "iot:write": false,
       "schema:name": "name"
+    },
+    {
+      "@id": "#when",
+      "@type": "iot:Attribute",
+      "iot:actuator": false,
+      "iot:format": "iot:format.datetime",
+      "iot:purpose": "iot-purpose:when",
+      "iot:read": true,
+      "iot:sensor": true,
+      "iot:type": "iot:type.string",
+      "iot:write": false,
+      "schema:name": "when"
     },
     {
       "@id": "#conditions",
@@ -57,6 +81,34 @@
       "schema:name": "temperature"
     },
     {
+      "@id": "#temperature_minimum",
+      "@type": "iot:Attribute",
+      "iot:actuator": false,
+      "iot:purpose": "iot-purpose:temperature",
+      "iot:qualifier": "iot-purpose:qualifier.minimum",
+      "iot:qualifier-period": "iot-purpose:qualifier.period.day",
+      "iot:read": true,
+      "iot:sensor": true,
+      "iot:type": "iot:type.number",
+      "iot:unit": "iot-unit:temperature.si.celsius",
+      "iot:write": false,
+      "schema:name": "temperature_minimum"
+    },
+    {
+      "@id": "#temperature_maximum",
+      "@type": "iot:Attribute",
+      "iot:actuator": false,
+      "iot:purpose": "iot-purpose:temperature",
+      "iot:qualifier": "iot-purpose:qualifier.maximum",
+      "iot:qualifier-period": "iot-purpose:qualifier.period.day",
+      "iot:read": true,
+      "iot:sensor": true,
+      "iot:type": "iot:type.number",
+      "iot:unit": "iot-unit:temperature.si.celsius",
+      "iot:write": false,
+      "schema:name": "temperature_maximum"
+    },
+    {
       "@id": "#pressure",
       "@type": "iot:Attribute",
       "iot:actuator": false,
@@ -64,7 +116,7 @@
       "iot:read": true,
       "iot:sensor": true,
       "iot:type": "iot:type.number",
-      "iot:unit": "iot-unit:temperature.si.xxx",
+      "iot:unit": "iot-unit:pressure.si.pascal.3",
       "iot:write": false,
       "schema:name": "pressure"
     },
@@ -124,6 +176,32 @@
       "iot:unit": "iot-unit:length.si.metre",
       "iot:write": false,
       "schema:name": "visibility"
+    },
+    {
+      "@id": "#wind_speed",
+      "@type": "iot:Attribute",
+      "iot:actuator": false,
+      "iot:minimum": 0,
+      "iot:purpose": "iot-purpose:velocity",
+      "iot:read": true,
+      "iot:sensor": true,
+      "iot:type": "iot:type.number",
+      "iot:unit": "iot-unit:speed.si.kilometre-per-hour",
+      "iot:write": false,
+      "schema:name": "wind_speed"
+    },
+    {
+      "@id": "#wind_direction",
+      "@type": "iot:Attribute",
+      "iot:actuator": false,
+      "iot:minimum": 0,
+      "iot:purpose": "iot-purpose:angle",
+      "iot:read": true,
+      "iot:sensor": true,
+      "iot:type": "iot:type.number",
+      "iot:unit": "iot-unit:math.angle.degree",
+      "iot:write": false,
+      "schema:name": "wind_direction"
     }
   ],
   "iot:model-id": "open-weather-map-forecast",

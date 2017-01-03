@@ -80,7 +80,6 @@ OpenWeatherMapBridge.prototype.discover = function () {
     let found = false;
     const _try = () => {
         self._fetch((itemd, hash_key) => {
-            console.log("XXX", hash_key);
             if (!hash_key) {
                 return;
             }
@@ -203,7 +202,7 @@ OpenWeatherMapBridge.prototype._cook = function (ind) {
     const outd = {
         name: _.d.first(ind, "/name", null),
         id: _.d.first(ind, "/id", null),
-        conditions: _.d.first(ind, "/weather/conditions"),
+        conditions: _.d.first(ind, "/weather/description"),
 
         latitude: _.d.first(ind, "/coord/lat", null),
         longitude: _.d.first(ind, "/coord/lon", null),
@@ -217,7 +216,7 @@ OpenWeatherMapBridge.prototype._cook = function (ind) {
         visibility: _.d.first(ind, "/visibility", null),
 
         wind_speed: _.d.first(ind, "/wind/speed", null),
-        wind_degrees: _.d.first(ind, "/wind/deg", null),
+        wind_direction: _.d.first(ind, "/wind/deg", null),
     }
 
     const date = ind.dt_txt;
@@ -285,9 +284,10 @@ OpenWeatherMapBridge.prototype._fetch_forecast = function (pulled) {
         }
 
         _.d.list(body, "list", []).forEach(itemd => {
-            const hash_key = itemd.dt_txt;
+            const hash_key = new Date(itemd.dt_txt).toISOString();
 
-            if (self.initd.hash_key && (hash_key !== self.initd.hash_key)) {
+            // console.log("HERE:XXX", self.native.hash_key, hash_key);
+            if (self.native && self.native.hash_key && (hash_key !== self.native.hash_key)) {
                 return;
             }
 
@@ -327,7 +327,6 @@ OpenWeatherMapBridge.prototype._fetch_url = function (url, done) {
         return done(d.error, d.body)
     }
 
-    console.log("FETCH", url);
     unirest
         .get(url)
         .end(result => {
@@ -353,11 +352,17 @@ OpenWeatherMapBridge.prototype.meta = function () {
         return;
     }
 
-    return {
+    const metad = {
         "iot:thing-id": _.id.thing_urn.unique("OpenWeatherMap", self.initd.retrieve, self.native.id, self.native.hash_key),
         "schema:name": self.native.name || "OpenWeatherMap",
-        "iot:vendor.key": self.native.hash_key,
+        "schema:address": self.location,
     };
+
+    if (_.is.Timestamp(self.native.hash_key)) {
+        metad["iot-purpose:when"] = self.native.hash_key
+    }
+
+    return metad;
 };
 
 /**

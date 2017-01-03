@@ -5,6 +5,12 @@ ATTRIBUTE name WITH
     iot:purpose = schema:addressLocality,
     iot:type = iot:type.string,
     iot:sensor = true
+ATTRIBUTE when WITH
+    schema:name = "when",
+    iot:purpose = iot-purpose:when,
+    iot:type = iot:type.string,
+    iot:format = iot:format.datetime,
+    iot:sensor = true
 ATTRIBUTE conditions WITH
     schema:name = "conditions",
     iot:purpose = iot-purpose:value,
@@ -16,11 +22,27 @@ ATTRIBUTE temperature WITH
     iot:type = iot:type.number,
     iot:unit = iot-unit:temperature.si.celsius,
     iot:sensor = true
+ATTRIBUTE temperature_minimum WITH
+    schema:name = "temperature_minimum",
+    iot:purpose = iot-purpose:temperature,
+    iot:qualifier = iot-purpose:qualifier.minimum,
+    iot:qualifier-period = iot-purpose:qualifier.period.day,
+    iot:type = iot:type.number,
+    iot:unit = iot-unit:temperature.si.celsius,
+    iot:sensor = true
+ATTRIBUTE temperature_maximum WITH
+    schema:name = "temperature_maximum",
+    iot:purpose = iot-purpose:temperature,
+    iot:qualifier = iot-purpose:qualifier.maximum,
+    iot:qualifier-period = iot-purpose:qualifier.period.day,
+    iot:type = iot:type.number,
+    iot:unit = iot-unit:temperature.si.celsius,
+    iot:sensor = true
 ATTRIBUTE pressure WITH
     schema:name = "pressure",
     iot:purpose = iot-purpose:pressure,
     iot:type = iot:type.number,
-    iot:unit = iot-unit:temperature.si.xxx,
+    iot:unit = "iot-unit:pressure.si.pascal.3",
     iot:sensor = true
 ATTRIBUTE humidity WITH
     schema:name = "humidity",
@@ -55,9 +77,21 @@ ATTRIBUTE visibility WITH
     iot:unit = iot-unit:length.si.metre,
     iot:minimum = 0,
     iot:sensor = true
+ATTRIBUTE wind_speed WITH
+    schema:name = "wind_speed",
+    iot:purpose = iot-purpose:velocity,
+    iot:type = iot:type.number,
+    iot:unit = iot-unit:speed.si.kilometre-per-hour,
+    iot:minimum = 0,
+    iot:sensor = true
+ATTRIBUTE wind_direction WITH
+    schema:name = "wind_direction",
+    iot:purpose = iot-purpose:angle,
+    iot:type = iot:type.number,
+    iot:unit = iot-unit:math.angle.degree,
+    iot:minimum = 0,
+    iot:sensor = true
 ;
 -- id: _.d.first(ind, "/id", null),
 -- temperature_minimum: _k2c(_.d.first(ind, "/main/temp_min", null)),
 -- temperature_maximum: _k2c(_.d.first(ind, "/main/temp_max", null)),
--- wind_speed: _.d.first(ind, "/wind/speed", null),
--- wind_degrees: _.d.first(ind, "/wind/deg", null),

@@ -34,6 +34,9 @@ const logger = iotdb.logger({
     module: 'OpenWeatherMapBridge',
 });
 
+// global
+const urld = {};
+
 /**
  *  See {iotdb.bridge.Bridge#Bridge} for documentation.
  *  <p>
@@ -76,20 +79,23 @@ OpenWeatherMapBridge.prototype.discover = function () {
 
     let found = false;
     const _try = () => {
-        self._fetch(item => {
-            found = true;
-            clearTimeout(timer);
+        self._fetch((itemd, hash_key) => {
+            console.log("XXX", hash_key);
+            if (!hash_key) {
+                return;
+            }
 
             self.discovered(new OpenWeatherMapBridge(self.initd, {
-                id: item.id,
-                name: item.name,
+                id: itemd.id,
+                name: itemd.name,
+                hash_key: hash_key,
             }));
         })
     }
 
     _try()
-    const timer = setInterval(_try, 30 * 1000);
 
+    const timerId = setInterval(_try, self.initd.poll * 1000);
 };
 
 /**
@@ -178,7 +184,7 @@ OpenWeatherMapBridge.prototype.pull = function () {
         return;
     }
 
-    self._fetch(self.pulled);
+    self._fetch((pulld, new_key) => self.pulled(pulld));
 };
 
 OpenWeatherMapBridge.prototype._cook = function (ind) {
@@ -197,7 +203,7 @@ OpenWeatherMapBridge.prototype._cook = function (ind) {
     const outd = {
         name: _.d.first(ind, "/name", null),
         id: _.d.first(ind, "/id", null),
-        description: _.d.first(ind, "/weather/description"),
+        conditions: _.d.first(ind, "/weather/conditions"),
 
         latitude: _.d.first(ind, "/coord/lat", null),
         longitude: _.d.first(ind, "/coord/lon", null),
@@ -212,6 +218,11 @@ OpenWeatherMapBridge.prototype._cook = function (ind) {
 
         wind_speed: _.d.first(ind, "/wind/speed", null),
         wind_degrees: _.d.first(ind, "/wind/deg", null),
+    }
+
+    const date = ind.dt_txt;
+    if (date) {
+        outd.when = new Date(date).toISOString();
     }
 
     return _.d.transform(outd, { filter: value => value !== null });
@@ -233,34 +244,103 @@ OpenWeatherMapBridge.prototype._fetch_observation = function (pulled) {
     const self = this;
 
     const url = `http://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(self.initd.location)}&appid=${self.initd.key}`
+    const hash_key = "forecast";
 
-    unirest
-        .get(url)
-        .end(result => {
-            if (result.error) {
-                logger.error({
-                    method: "_fetch_observation",
-                    error: result.error,
-                }, "likely a network error");
+    self._fetch_url(url, (error, body) => {
+        if (error) {
+            logger.error({
+                method: "_fetch_observation",
+                error: result.error,
+            }, "likely a network error");
+            return;
+        }
+
+        const hash = _.hash.md5(cjson(body))
+        const is_new = !self.hashd[hash_key];
+        if (self.hashd[hash_key] === hash) {
+            logger.debug({
+                method: "_fetch_observation",
+            }, "no change");
+            return;
+        }
+
+        self.hashd[hash_key] = hash;
+
+        pulled(self._cook(body), is_new ? hash_key : null);
+    })
+}
+
+OpenWeatherMapBridge.prototype._fetch_forecast = function (pulled) {
+    const self = this;
+
+    const url = `http://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(self.initd.location)}&appid=${self.initd.key}`
+
+    self._fetch_url(url, (error, body) => {
+        if (error) {
+            logger.error({
+                method: "_fetch_forecast",
+                error: result.error,
+            }, "likely a network error");
+            return;
+        }
+
+        _.d.list(body, "list", []).forEach(itemd => {
+            const hash_key = itemd.dt_txt;
+
+            if (self.initd.hash_key && (hash_key !== self.initd.hash_key)) {
                 return;
             }
 
-            const hash = _.hash.md5(cjson(result.body))
-            if (self.hashd["forecast"] === hash) {
+            const hash = _.hash.md5(cjson(itemd))
+            const is_new = !self.hashd[hash_key];
+            if (self.hashd[hash_key] === hash) {
                 logger.debug({
-                    method: "_fetch_observation",
+                    method: "_fetch_forecast",
                 }, "no change");
                 return;
             }
 
-            self.hashd["forecast"] = hash;
+            self.hashd[hash_key] = hash;
 
-            pulled(self._cook(result.body));
+            pulled(self._cook(itemd), is_new ? hash_key : null);
+        })
+    })
+}
+
+/**
+ *  This caches URLs for 60 seconds to stop quick repeats
+ */
+OpenWeatherMapBridge.prototype._fetch_url = function (url, done) {
+    const self = this;
+
+    const now = (new Date()).getTime();
+
+    const removes = [];
+    _.mapObject(urld, (d, url) => {
+        if ((now - d.downloaded) > (60 * 1000)) {
+            removes.push(url);
+        }
+    })
+
+    const d = urld[url];
+    if (d) {
+        return done(d.error, d.body)
+    }
+
+    console.log("FETCH", url);
+    unirest
+        .get(url)
+        .end(result => {
+            urld[url] = {
+                downloaded: now,
+                error: result.error || null,
+                body: result.body || null,
+            }
+
+            return done(urld[url].error, urld[url].body)
         })
 }
 
-OpenWeatherMapBridge.prototype._fetch_forecast = function (pulled) {
-}
 
 /* --- state --- */
 
@@ -274,13 +354,9 @@ OpenWeatherMapBridge.prototype.meta = function () {
     }
 
     return {
-        "iot:thing-id": _.id.thing_urn.unique("OpenWeatherMap", self.initd.retrieve, self.native.id),
+        "iot:thing-id": _.id.thing_urn.unique("OpenWeatherMap", self.initd.retrieve, self.native.id, self.native.hash_key),
         "schema:name": self.native.name || "OpenWeatherMap",
-
-        // "iot:thing-number": self.initd.number,
-        // "iot:device-id": _.id.thing_urn.unique("OpenWeatherMap", self.native.uuid),
-        // "schema:manufacturer": "",
-        // "schema:model": "",
+        "iot:vendor.key": self.native.hash_key,
     };
 };
 

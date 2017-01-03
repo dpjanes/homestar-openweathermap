@@ -1,9 +1,9 @@
 {
   "@context": {
-    "@base": "file:///open-weather-map-forecast",
-    "@vocab": "file:///open-weather-map-forecast#",
+    "@base": "file:///open-weather-map-observation",
+    "@vocab": "file:///open-weather-map-observation#",
     "iot": "https://iotdb.org/pub/iot#",
-    "iot-purpose": "https://iotdb.org/pub/iot-purpose#",
+    "schema": "http://schema.org/",
     "iot:purpose": {
       "@id": "https://iotdb.org/pub/iot#purpose",
       "@type": "@id"
@@ -12,16 +12,38 @@
       "@id": "https://iotdb.org/pub/iot#type",
       "@type": "@id"
     },
+    "iot-purpose": "https://iotdb.org/pub/iot-purpose#",
     "iot-unit": "https://iotdb.org/pub/iot-unit#",
     "iot:unit": {
       "@id": "https://iotdb.org/pub/iot#unit",
       "@type": "@id"
-    },
-    "schema": "http://schema.org/"
+    }
   },
   "@id": "",
   "@type": "iot:Model",
   "iot:attribute": [
+    {
+      "@id": "#name",
+      "@type": "iot:Attribute",
+      "iot:actuator": false,
+      "iot:purpose": "schema:addressLocality",
+      "iot:read": true,
+      "iot:sensor": true,
+      "iot:type": "iot:type.string",
+      "iot:write": false,
+      "schema:name": "name"
+    },
+    {
+      "@id": "#conditions",
+      "@type": "iot:Attribute",
+      "iot:actuator": false,
+      "iot:purpose": "iot-purpose:value",
+      "iot:read": true,
+      "iot:sensor": true,
+      "iot:type": "iot:type.string",
+      "iot:write": false,
+      "schema:name": "conditions"
+    },
     {
       "@id": "#temperature",
       "@type": "iot:Attribute",
@@ -33,6 +55,18 @@
       "iot:unit": "iot-unit:temperature.si.celsius",
       "iot:write": false,
       "schema:name": "temperature"
+    },
+    {
+      "@id": "#pressure",
+      "@type": "iot:Attribute",
+      "iot:actuator": false,
+      "iot:purpose": "iot-purpose:pressure",
+      "iot:read": true,
+      "iot:sensor": true,
+      "iot:type": "iot:type.number",
+      "iot:unit": "iot-unit:temperature.si.xxx",
+      "iot:write": false,
+      "schema:name": "pressure"
     },
     {
       "@id": "#humidity",
@@ -49,17 +83,49 @@
       "schema:name": "humidity"
     },
     {
-      "@id": "#conditions",
+      "@id": "#latitude",
       "@type": "iot:Attribute",
       "iot:actuator": false,
-      "iot:purpose": "iot-purpose:value",
+      "iot:maximum": 90,
+      "iot:minimum": -90,
+      "iot:purpose": "iot-purpose:latitude",
       "iot:read": true,
       "iot:sensor": true,
-      "iot:type": "iot:type.string",
+      "iot:type": "iot:type.number",
+      "iot:unit": "iot-unit:math.angle.degree",
+      "iot:vector": "latitude/longitude",
       "iot:write": false,
-      "schema:name": "conditions"
+      "schema:name": "latitude"
+    },
+    {
+      "@id": "#longitude",
+      "@type": "iot:Attribute",
+      "iot:actuator": false,
+      "iot:maximum": 180,
+      "iot:minimum": -180,
+      "iot:purpose": "iot-purpose:longitude",
+      "iot:read": true,
+      "iot:sensor": true,
+      "iot:type": "iot:type.number",
+      "iot:unit": "iot-unit:math.angle.degree",
+      "iot:vector": "latitude/longitude",
+      "iot:write": false,
+      "schema:name": "longitude"
+    },
+    {
+      "@id": "#visibility",
+      "@type": "iot:Attribute",
+      "iot:actuator": false,
+      "iot:minimum": 0,
+      "iot:purpose": "iot-purpose:visibility",
+      "iot:read": true,
+      "iot:sensor": true,
+      "iot:type": "iot:type.number",
+      "iot:unit": "iot-unit:length.si.metre",
+      "iot:write": false,
+      "schema:name": "visibility"
     }
   ],
-  "iot:model-id": "open-weather-map-forecast",
-  "schema:name": "Open Weather Map Forecast"
+  "iot:model-id": "open-weather-map-observation",
+  "schema:name": "Open Weather Map Observation"
 }

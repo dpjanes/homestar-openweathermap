@@ -1,7 +1,7 @@
 {
   "@context": {
-    "@base": "file:///open-weather-map-observation",
-    "@vocab": "file:///open-weather-map-observation#",
+    "@base": "file:///open-weather-map-forecast",
+    "@vocab": "file:///open-weather-map-forecast#",
     "iot": "https://iotdb.org/pub/iot#",
     "iot-purpose": "https://iotdb.org/pub/iot-purpose#",
     "iot:purpose": {
@@ -60,6 +60,6 @@
       "schema:name": "conditions"
     }
   ],
-  "iot:model-id": "open-weather-map-observation",
-  "schema:name": "Open Weather Map Observation"
+  "iot:model-id": "open-weather-map-forecast",
+  "schema:name": "Open Weather Map Forecast"
 }

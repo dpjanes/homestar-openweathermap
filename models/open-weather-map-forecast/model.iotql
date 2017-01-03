@@ -1,12 +1,27 @@
-CREATE MODEL OpenWeatherMapForecast WITH
-    schema:name = "Open Weather Map Forecast"
+CREATE MODEL OpenWeatherMapObservation WITH
+    schema:name = "Open Weather Map Observation"
+ATTRIBUTE name WITH
+    schema:name = "name",
+    iot:purpose = schema:addressLocality,
+    iot:type = iot:type.string,
+    iot:sensor = true
+ATTRIBUTE conditions WITH
+    schema:name = "conditions",
+    iot:purpose = iot-purpose:value,
+    iot:type = iot:type.string,
+    iot:sensor = true
 ATTRIBUTE temperature WITH
     schema:name = "temperature",
     iot:purpose = iot-purpose:temperature,
     iot:type = iot:type.number,
     iot:unit = iot-unit:temperature.si.celsius,
-    iot:sensor = true,
-    iot:read = true
+    iot:sensor = true
+ATTRIBUTE pressure WITH
+    schema:name = "pressure",
+    iot:purpose = iot-purpose:pressure,
+    iot:type = iot:type.number,
+    iot:unit = iot-unit:temperature.si.xxx,
+    iot:sensor = true
 ATTRIBUTE humidity WITH
     schema:name = "humidity",
     iot:purpose = iot-purpose:humidity,
@@ -14,12 +29,35 @@ ATTRIBUTE humidity WITH
     iot:unit = iot-unit:math.fraction.percent,
     iot:minimum = 0,
     iot:maximum = 100,
-    iot:sensor = true,
-    iot:read = true
-ATTRIBUTE conditions WITH
-    schema:name = "conditions",
-    iot:purpose = iot-purpose:value,
-    iot:type = iot:type.string,
-    iot:sensor = true,
-    iot:read = true
+    iot:sensor = true
+ATTRIBUTE latitude WITH
+    schema:name = "latitude",
+    iot:purpose = iot-purpose:latitude,
+    iot:type = iot:type.number,
+    iot:unit = iot-unit:math.angle.degree,
+    iot:vector = "latitude/longitude",
+    iot:minimum = -90,
+    iot:maximum = 90,
+    iot:sensor = true
+ATTRIBUTE longitude WITH
+    schema:name = "longitude",
+    iot:purpose = iot-purpose:longitude,
+    iot:type = iot:type.number,
+    iot:unit = iot-unit:math.angle.degree,
+    iot:vector = "latitude/longitude",
+    iot:minimum = -180,
+    iot:maximum = 180,
+    iot:sensor = true
+ATTRIBUTE visibility WITH
+    schema:name = "visibility",
+    iot:purpose = iot-purpose:visibility,
+    iot:type = iot:type.number,
+    iot:unit = iot-unit:length.si.metre,
+    iot:minimum = 0,
+    iot:sensor = true
 ;
+-- id: _.d.first(ind, "/id", null),
+-- temperature_minimum: _k2c(_.d.first(ind, "/main/temp_min", null)),
+-- temperature_maximum: _k2c(_.d.first(ind, "/main/temp_max", null)),
+-- wind_speed: _.d.first(ind, "/wind/speed", null),
+-- wind_degrees: _.d.first(ind, "/wind/deg", null),

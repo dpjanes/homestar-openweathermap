@@ -1,5 +1,5 @@
 /*
- *  OpenWeatherMapObservation.js
+ *  OpenWeatherMapForecast.js
  *
  *  David Janes
  *  IOTDB

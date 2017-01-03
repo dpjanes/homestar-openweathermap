@@ -1,5 +1,5 @@
-CREATE MODEL OpenWeatherMapObservation WITH
-    schema:name = "Open Weather Map Observation"
+CREATE MODEL OpenWeatherMapForecast WITH
+    schema:name = "Open Weather Map Forecast"
 ATTRIBUTE name WITH
     schema:name = "name",
     iot:purpose = schema:addressLocality,
